@@ -3,61 +3,92 @@ package main.java.algorithm;
 import main.java.base.SparkBase;
 import main.java.controller.MainController;
 
+import main.java.util.FileUtil;
 import org.apache.spark.ml.classification.MultilayerPerceptronClassificationModel;
 import org.apache.spark.ml.classification.MultilayerPerceptronClassifier;
 import org.apache.spark.ml.evaluation.MulticlassClassificationEvaluator;
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
 
-public class MultilayerPerceptronClassifierAlgorithm {
+import java.util.ArrayList;
+
+public class MultilayerPerceptronClassifierAlgorithm extends BaseAlgorithm {
 
     public SparkBase sparkBase;
+    public FileUtil fileUtil;
 
     public MultilayerPerceptronClassifierAlgorithm(SparkBase sparkBase){
         this.sparkBase = sparkBase;
+        this.fileUtil  = new FileUtil();
     }
 
-    public void applyMultilayerPerceptronClassifier(String svFilePath, MainController mainController, Integer featureCount, Integer classCount){
-        Double accuracySum = new Double(0);
-        Double precisionSum = new Double(0);
-        Double recallSum = new Double(0);
+    public void applyMultilayerPerceptronClassifier(String svFilePath, MainController mainController, Integer featureCount, Integer classCount, String fileName, Integer numOfFeatures){
+        ArrayList<Double> accuracyList  = new ArrayList<>();
+        ArrayList<Double> precisionList = new ArrayList<>();
+        ArrayList<Double> recallList    = new ArrayList<>();
         int[] layers = new int[] {featureCount, 5, 4, classCount};
 
-        Dataset<Row> dataFrame =
-                sparkBase.getSpark().read().format("libsvm").load(svFilePath);
+        Dataset<Row> trainingData = null;
+        Dataset<Row> testData     = null;
+        ArrayList<ArrayList<Dataset<Row>>> datasets = new ArrayList<>();
 
-        Dataset<Row>[] splits = dataFrame.randomSplit(new double[]
-                {mainController.getTrainingDataRate(), mainController.getTestDataRate()}, 1234L);
-        Dataset<Row> train = splits[0];
-        Dataset<Row> test = splits[1];
+        int counter;
+        for(int i=0; i<mainController.getIterationCountValue(); i++){
+            Double accuracySumKFold  = new Double(0);
+            Double precisionSumKFold = new Double(0);
+            Double recallSumKFold    = new Double(0);
 
-        MultilayerPerceptronClassifier trainer = new MultilayerPerceptronClassifier()
-                .setLayers(layers)
-                .setBlockSize(128)
-                .setSeed(1234L)
-                .setMaxIter(100);
+            if(mainController.getTenFold().isSelected()){
+                counter = 10;
+                datasets = splitAccordingTo10FoldCrossValidation(svFilePath, i, fileName, sparkBase, numOfFeatures);
+            }else {
+                counter = 1;
+                Dataset<Row>[] splits = fileUtil.getDataSet(sparkBase, svFilePath).randomSplit(new double[]{mainController.getTrainingDataRate(), mainController.getTestDataRate()});
+                trainingData = splits[0];
+                testData = splits[1];
+            }
 
-        MultilayerPerceptronClassificationModel model = trainer.fit(train);
+            for (int k=0; k<counter; k++){
+                if(mainController.getTenFold().isSelected()){
+                    testData = datasets.get(k).get(0);
+                    trainingData = datasets.get(k).get(1);
+                }
 
-        Dataset<Row> result = model.transform(test);
-        Dataset<Row> predictions = result.select("prediction", "label");
-        MulticlassClassificationEvaluator evaluator = new MulticlassClassificationEvaluator()
-                .setMetricName("weightedPrecision");
+                MultilayerPerceptronClassifier trainer = new MultilayerPerceptronClassifier()
+                        .setLayers(layers)
+                        .setBlockSize(128)
+                        .setSeed(1234L)
+                        .setMaxIter(20)
+                        .setTol(0.0001);
 
-        precisionSum += (evaluator.evaluate(predictions));
+                MultilayerPerceptronClassificationModel model = trainer.fit(trainingData);
 
-        evaluator.setMetricName("weightedRecall");
-        recallSum += (evaluator.evaluate(predictions));
+                Dataset<Row> result = model.transform(testData);
+                Dataset<Row> predictions = result.select("prediction", "label");
+                MulticlassClassificationEvaluator evaluator = new MulticlassClassificationEvaluator()
+                        .setMetricName("weightedPrecision");
 
-        evaluator.setMetricName("accuracy");
-        accuracySum += (evaluator.evaluate(predictions));
+                precisionSumKFold += (evaluator.evaluate(predictions));
 
-        System.out.println("Iteration count: " + (1));
+                evaluator.setMetricName("weightedRecall");
+                recallSumKFold += (evaluator.evaluate(predictions));
 
-        System.out.println("Done!\n");
-        mainController.setAccuracy(accuracySum / mainController.getIterationCountValue());
-        mainController.setPrecision(precisionSum / mainController.getIterationCountValue());
-        mainController.setRecall(recallSum / mainController.getIterationCountValue());
+                evaluator.setMetricName("accuracy");
+                accuracySumKFold += (evaluator.evaluate(predictions));
+            }
+
+            accuracySumKFold  /= counter;
+            precisionSumKFold /= counter;
+            recallSumKFold    /= counter;
+
+            accuracyList.add(accuracySumKFold);
+            precisionList.add(precisionSumKFold);
+            recallList.add(recallSumKFold);
+            System.out.println("Iteration count: " + (i+1));
+        }
+
+
+        setResults(mainController, accuracyList, precisionList, recallList);
     }
 
 }

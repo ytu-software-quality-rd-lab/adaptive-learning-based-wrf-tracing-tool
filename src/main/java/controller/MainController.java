@@ -12,10 +12,13 @@ import javafx.scene.image.ImageView;
 import main.java.algorithm.*;
 import main.java.base.SparkBase;
 import main.java.util.ClassLabelProducerUtil;
+import main.java.util.MathUtil;
+import main.java.util.PROVOGenerator;
 import main.java.util.SparseVectorProducerUtil;
 
 import javax.swing.*;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.ResourceBundle;
 
 public class MainController implements Initializable {
@@ -37,6 +40,10 @@ public class MainController implements Initializable {
     @FXML Label resultLabel;
     @FXML Label errorMessageLabel;
     @FXML Label iterationCountLabel;
+    @FXML Label tenFoldString;
+    @FXML Label iterationCountString;
+
+    @FXML CheckBox tenFold;
 
     private String logFileName;
     private String logFilePath;
@@ -54,6 +61,10 @@ public class MainController implements Initializable {
     private Double accuracy;
     private Double recall;
     private Double precision;
+
+    private Double sdAccuracy;
+    private Double sdRecall;
+    private Double sdPrecision;
 
     private Boolean doesDataCreated;
 
@@ -74,6 +85,7 @@ public class MainController implements Initializable {
         trainingDataRateLabel.setText(trainingDataRate.toString());
         testDataRateLabel.setText(testDataRate.toString());
         resultLabel.setText("Results: Nothing worked yet.");
+        tenFoldString.setText("Inactive");
 
         ytuLogo.setImage(new Image(getClass().getResourceAsStream("../../resource/ytu.png")));
         testRate.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(1,99));
@@ -100,6 +112,7 @@ public class MainController implements Initializable {
             }
         });
 
+        selectAlgorithmComboBox.setVisibleRowCount(100);
         selectAlgorithmComboBox.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent actionEvent) {
@@ -108,6 +121,9 @@ public class MainController implements Initializable {
             }
         });
 
+        long time = System.currentTimeMillis();
+        new PROVOGenerator().producePROVOFileFromFilteredWRFLogFile(System.getProperty("user.dir") + "/data/filtered_log_file");
+        System.out.println("Total time to produce PROV-O file: " + (System.currentTimeMillis() - time));
         runButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent actionEvent) {
@@ -131,67 +147,72 @@ public class MainController implements Initializable {
                         System.out.println("Sparse vector was created before, skipping this part ...");
                     }
 
+                    long start = System.currentTimeMillis();
                     if(algorithmPointer == 0){       // Logistic Regression With Binary Labels
 
                         LogisticRegressionAlgorithm logisticRegressionAlgorithm = new LogisticRegressionAlgorithm(sparkBase);
                         logisticRegressionAlgorithm.setLrFamily("binomial");
-                        logisticRegressionAlgorithm.applyLogisticRegression(fileWithBinaryLabelsPath, getInstance());
+                        logisticRegressionAlgorithm.applyLogisticRegression(fileWithBinaryLabelsPath, getInstance(), false, logFileName, sparseVectorProducerUtil.numOfVocab);
 
                     }else if(algorithmPointer == 1){ // Logistic Regression With Multi Class Labels
 
                         LogisticRegressionAlgorithm logisticRegressionAlgorithm = new LogisticRegressionAlgorithm(sparkBase);
                         logisticRegressionAlgorithm.setLrFamily("multinomial");
-                        logisticRegressionAlgorithm.applyLogisticRegression(fileWithMultiClassLabelsPath, getInstance());
+                        logisticRegressionAlgorithm.applyLogisticRegression(fileWithMultiClassLabelsPath, getInstance(), true,  logFileName, sparseVectorProducerUtil.numOfVocab);
 
                     }else if(algorithmPointer == 2){ // Naive Bayes With Binary Labels
 
                         NaiveBayesAlgorithm naiveBayesAlgorithm = new NaiveBayesAlgorithm(sparkBase);
-                        naiveBayesAlgorithm.applyNaiveBayes(fileWithBinaryLabelsPath, getInstance());
+                        naiveBayesAlgorithm.applyNaiveBayes(fileWithBinaryLabelsPath, getInstance(), logFileName, sparseVectorProducerUtil.numOfVocab);
 
                     }else if(algorithmPointer == 3){ // Naive Bayes With Multi Class Labels
 
                         NaiveBayesAlgorithm naiveBayesAlgorithm = new NaiveBayesAlgorithm(sparkBase);
-                        naiveBayesAlgorithm.applyNaiveBayes(fileWithMultiClassLabelsPath, getInstance());
+                        naiveBayesAlgorithm.applyNaiveBayes(fileWithMultiClassLabelsPath, getInstance(), logFileName, sparseVectorProducerUtil.numOfVocab);
 
                     }else if(algorithmPointer == 4){ // Random Forest With Binary Class Labels
 
                         RandomForestAlgorithm randomForestAlgorithm = new RandomForestAlgorithm(sparkBase);
-                        randomForestAlgorithm.applyRandomForest(fileWithBinaryLabelsPath, getInstance(), 2);
+                        randomForestAlgorithm.applyRandomForest(fileWithBinaryLabelsPath, getInstance(), 2, logFileName, sparseVectorProducerUtil.numOfVocab);
                         // 2 category for if row contains provenance info or not
 
                     }else if(algorithmPointer == 5){ // Random Forest With Multi Class Labels
 
                         RandomForestAlgorithm randomForestAlgorithm = new RandomForestAlgorithm(sparkBase);
-                        randomForestAlgorithm.applyRandomForest(fileWithMultiClassLabelsPath, getInstance(), 4);
+                        randomForestAlgorithm.applyRandomForest(fileWithMultiClassLabelsPath, getInstance(), 4, logFileName, sparseVectorProducerUtil.numOfVocab);
                         // 4 category for communication, derivation, generation and usage
 
                     }else if(algorithmPointer == 6){ // Multilayer Perceptron Classifier With Binary Labels
 
                         MultilayerPerceptronClassifierAlgorithm perceptronClassifierAlgorithm = new MultilayerPerceptronClassifierAlgorithm(sparkBase);
-                        perceptronClassifierAlgorithm.applyMultilayerPerceptronClassifier(fileWithBinaryLabelsPath, getInstance(), featureCount, 2);
+                        perceptronClassifierAlgorithm.applyMultilayerPerceptronClassifier(fileWithBinaryLabelsPath, getInstance(), featureCount, 2, logFileName, sparseVectorProducerUtil.numOfVocab);
                         // 2 class for if row contains provenance info or not
 
                     }else if(algorithmPointer == 7){ // Multilayer Perceptron Classifier With Multi Class Labels
 
                         MultilayerPerceptronClassifierAlgorithm perceptronClassifierAlgorithm = new MultilayerPerceptronClassifierAlgorithm(sparkBase);
-                        perceptronClassifierAlgorithm.applyMultilayerPerceptronClassifier(fileWithBinaryLabelsPath, getInstance(), featureCount, 4);
+                        perceptronClassifierAlgorithm.applyMultilayerPerceptronClassifier(fileWithBinaryLabelsPath, getInstance(), featureCount, 4, logFileName, sparseVectorProducerUtil.numOfVocab);
                         // 4 class for communication, derivation, generation and usage
-
-                    }else if(algorithmPointer == 8){ // Manual Naive Bayes Algorithm with Binary Class Labeled
-
-                        NaiveBayesManual naiveBayesManual = new NaiveBayesManual();
-                        naiveBayesManual.applyNaiveBayesAlgorithmForBinaryClassLabels(getInstance(), fileWithBinaryLabelsPath);
-
-                    }else if(algorithmPointer == 9){ // Manual Naive Bayes Algorithm with Multi-Class Class Labeled
-
-                        NaiveBayesManual naiveBayesManual = new NaiveBayesManual();
-                        naiveBayesManual.applyNaiveBayesAlgorithmForBinaryClassLabels(getInstance(), fileWithMultiClassLabelsPath);
 
                     }
 
+                    System.out.println("Time to apply the algorithm: " + (System.currentTimeMillis() - start));
                     String resultString = "Results:\n\nAlgorithm: " + selectAlgorithmComboBox.getSelectionModel().getSelectedItem().toString() +
-                            "\nTest Data Rate: " + getTestDataRate() + "\nTraining Data Rate: " + getTrainingDataRate() +
-                            "\nIteration Count: " + iterationCountValue + "\nAccuracy: " + getAccuracy() + "\nPrecision: " + precision + "\nRecall: " + getRecall();
+                            "\nTest Method: " + (tenFold.isSelected() ? " 10-fold cross validations" : "Using test set") +
+                            (tenFold.isSelected() ? "" : "\nTest Data Rate: " + getTestDataRate() + "\nTraining Data Rate: " + getTrainingDataRate()) +
+                            "\nIteration Count: " + iterationCountValue +
+                            "\nMean of Accuracy: %" +
+                            ((Double) (getAccuracy() * 100)).toString().substring(0, ((Double) (getAccuracy() * 100)).toString().length() > 6 ? 6 : ((Double) (getAccuracy() * 100)).toString().length()) +
+                            "\nMean of Precision: %" +
+                            ((Double) (getPrecision() * 100)).toString().substring(0, ((Double) (getPrecision() * 100)).toString().length() > 6 ? 6 : ((Double) (getPrecision() * 100)).toString().length()) +
+                            "\nMean of Recall: %" +
+                            ((Double) (getRecall() * 100)).toString().substring(0, ((Double) (getRecall() * 100)).toString().length() > 6 ? 6 : ((Double) (getRecall() * 100)).toString().length()) +
+                            "\nStandard Deviation for Accuracy: " +
+                            ((Double) (getSdAccuracy() * 100)).toString().substring(0, ((Double) (getSdAccuracy() * 100)).toString().length() > 6 ? 6 : ((Double) (getSdAccuracy() * 100)).toString().length()) +
+                            "\nStandard Deviation for Precision: " +
+                            ((Double) (getSdPrecision() * 100)).toString().substring(0, ((Double) (getSdPrecision() * 100)).toString().length() > 6 ? 6 : ((Double) (getSdPrecision() * 100)).toString().length()) +
+                            "\nStandard Deviation for Recall: " +
+                            ((Double) (getSdRecall() * 100)).toString().substring(0, ((Double) (getSdRecall() * 100)).toString().length() > 6 ? 6 : ((Double) (getSdRecall() * 100)).toString().length());
                     resultLabel.setText(resultString);
                     System.out.println(resultString);
 
@@ -221,6 +242,20 @@ public class MainController implements Initializable {
                 iterationCountLabel.setText(t1.toString());
             }
         });
+
+        tenFold.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                if(tenFold.isSelected()){
+                    testRate.setEditable(false);
+                    tenFoldString.setText("Active");
+                }else {
+                    testRate.setEditable(true);
+                    tenFoldString.setText("Inactive");
+                }
+            }
+        });
+
     }
 
     public Integer getTestDataRate() {
@@ -297,5 +332,37 @@ public class MainController implements Initializable {
 
     public void setFileWithMultiClassLabelsPath(String fileWithMultiClassLabelsPath) {
         this.fileWithMultiClassLabelsPath = fileWithMultiClassLabelsPath;
+    }
+
+    public CheckBox getTenFold() {
+        return tenFold;
+    }
+
+    public void setTenFold(CheckBox tenFold) {
+        this.tenFold = tenFold;
+    }
+
+    public Double getSdAccuracy() {
+        return sdAccuracy;
+    }
+
+    public void setSdAccuracy(Double sdAccuracy) {
+        this.sdAccuracy = sdAccuracy;
+    }
+
+    public Double getSdRecall() {
+        return sdRecall;
+    }
+
+    public void setSdRecall(Double sdRecall) {
+        this.sdRecall = sdRecall;
+    }
+
+    public Double getSdPrecision() {
+        return sdPrecision;
+    }
+
+    public void setSdPrecision(Double sdPrecision) {
+        this.sdPrecision = sdPrecision;
     }
 }

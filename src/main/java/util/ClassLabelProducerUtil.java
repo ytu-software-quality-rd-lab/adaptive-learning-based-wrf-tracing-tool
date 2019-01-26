@@ -1,6 +1,6 @@
 package main.java.util;
 
-import main.java.AdaptiveWRFTracingTool.bean.Keyword;
+import main.java.bean.Keyword;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -16,7 +16,7 @@ import java.util.Date;
 public class ClassLabelProducerUtil {
 
     public static final String keywordFilePath = System.getProperty("user.dir") + "/data/keywords.xml";
-    public ArrayList<main.java.AdaptiveWRFTracingTool.bean.Keyword> keywordList;
+    public ArrayList<main.java.bean.Keyword> keywordList;
 
     public ClassLabelProducerUtil(){
         keywordList = new ArrayList<>();
@@ -32,6 +32,11 @@ public class ClassLabelProducerUtil {
         }
 
         file = new File(root + "/mcl");
+        if(!file.exists()){
+            file.mkdir();
+        }
+
+        file = new File(root + "/folds");
         if(!file.exists()){
             file.mkdir();
         }

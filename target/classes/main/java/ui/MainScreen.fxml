@@ -11,6 +11,7 @@
 <?import javafx.scene.text.Font?>
 <?import javafx.scene.control.Spinner?>
 
+<?import javafx.scene.control.CheckBox?>
 <AnchorPane fx:controller="main.java.controller.MainController"
             xmlns:fx="http://javafx.com/fxml">
 
@@ -18,7 +19,7 @@
     </ImageView>
     <Label layoutX="120" layoutY="50" text="Adaptive Weather Research and Forecast Model Tracing Tool">
         <font>
-            <Font name="Times New Roman" size="20"/>
+            <Font name="Times New Roman" size="16"/>
         </font>
     </Label>
 
@@ -26,7 +27,7 @@
     <Label layoutX="50.0" layoutY="190.0" prefHeight="21.0" prefWidth="279.0" text="Algorithm: " />
 
     <Button fx:id="chooseLogFileButton" layoutX="150.0" layoutY="150.0" prefWidth="180.0" mnemonicParsing="false" text="Select File" />
-    <Button fx:id="runButton" layoutX="50.0" layoutY="310.0" prefWidth="280" mnemonicParsing="false" text="Run" />
+    <Button fx:id="runButton" layoutX="50.0" layoutY="350.0" prefWidth="280" mnemonicParsing="false" text="Run" />
 
     <ComboBox fx:id="selectAlgorithmComboBox" layoutX="150.0" layoutY="190.0" prefWidth="180.0" promptText="Choose Algorithm">
         <items>
@@ -39,8 +40,6 @@
                 <String fx:value="Random Forest With Multi Class Labels" />
                 <String fx:value="Multilayer Perceptron Classifier With Binary Labels" />
                 <String fx:value="Multilayer Perceptron Classifier With Multi Class Labels" />
-                <String fx:value="Manually Implemented Naive Bayes With Binary Class Labels" />
-                <String fx:value="Manually Implemented Naive Bayes With Multi-Class Class Labels" />
             </FXCollections>
         </items>
     </ComboBox>
@@ -54,19 +53,23 @@
     <Label fx:id="trainingDataRateLabel" layoutX="440" layoutY="230"  />
     <Label fx:id="testDataRateLabel" layoutX="545" layoutY="230"  />
 
-    <Label fx:id="errorMessageLabel" layoutY="360" layoutX="50" />
-    <Label fx:id="resultLabel" layoutX="50" layoutY="390" >
+    <Label fx:id="errorMessageLabel" layoutY="380" layoutX="50" />
+    <Label fx:id="resultLabel" layoutX="50" layoutY="410" >
         <font>
-            <Font name="Times New Roman" size="16"/>
+            <Font name="Times New Roman" size="12"/>
         </font>
     </Label>
 
     <Label layoutX="50.0" layoutY="230.0" prefHeight="21.0" prefWidth="150.0" text="Test Data Percentage:" />
-    <Spinner fx:id="testRate" layoutX="260" layoutY="230" prefWidth="70" />
+    <Spinner fx:id="testRate" layoutX="260" layoutY="230" prefWidth="70" editable="true" />
 
-    <Label layoutX="350" layoutY="270" text="Iteration Count: " />
-    <Label fx:id="iterationCountLabel"  layoutX="460" layoutY="270" />
-    <Label layoutX="50.0" layoutY="270.0" prefHeight="21.0" prefWidth="150.0" text="Iteration Count: " />
-    <Spinner fx:id="iterationCount" layoutX="260" layoutY="270" prefWidth="70" />
+    <Label fx:id="tenFoldString" layoutY="270" layoutX="350" />
+    <Label layoutX="50.0" layoutY="270.0" text="10-fold cross validation:" />
+    <CheckBox fx:id="tenFold" layoutX="310.0" prefWidth="20" layoutY="270" />
+
+    <Label fx:id="iterationCountString" layoutX="350" layoutY="310" text="Iteration Count: " />
+    <Label fx:id="iterationCountLabel"  layoutX="460" layoutY="310" />
+    <Label layoutX="50.0" layoutY="310.0" prefHeight="21.0" prefWidth="150.0" text="Iteration Count: " />
+    <Spinner fx:id="iterationCount" layoutX="260" layoutY="310" prefWidth="70" />
 
 </AnchorPane>

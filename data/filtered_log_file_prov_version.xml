@@ -1,0 +1,238 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<prov:document xmlns:prov="http://www.w3.org/ns/prov#" xmlns:ns2="http://openprovenance.org/prov/extension#" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:pronaliz="http://www.pronaliz.yildiz.edu.tr">
+<prov:activity prov:id="wrf"/>
+<prov:activity prov:id="alloc_and_configure_domain"/>
+<prov:wasInformedBy>
+	<prov:informed prov:ref="wrf"/>
+	<prov:informant prov:ref="alloc_and_configure_domain"/>
+</prov:wasInformedBy>
+<prov:activity prov:id="model_to_grid_config_rec"/>
+<prov:wasInformedBy>
+	<prov:informed prov:ref="wrf"/>
+	<prov:informant prov:ref="model_to_grid_config_rec"/>
+</prov:wasInformedBy>
+<prov:activity prov:id="set_scalar_indices_from_config"/>
+<prov:wasInformedBy>
+	<prov:informed prov:ref="wrf"/>
+	<prov:informant prov:ref="set_scalar_indices_from_config"/>
+</prov:wasInformedBy>
+<prov:activity prov:id="init_wrfio"/>
+<prov:wasInformedBy>
+	<prov:informed prov:ref="wrf"/>
+	<prov:informant prov:ref="init_wrfio"/>
+</prov:wasInformedBy>
+<prov:activity prov:id="ext_gr1_ioinit"/>
+<prov:wasInformedBy>
+	<prov:informed prov:ref="init_wrfio"/>
+	<prov:informant prov:ref="ext_gr1_ioinit"/>
+</prov:wasInformedBy>
+<prov:activity prov:id="setup_timekeeping"/>
+<prov:wasInformedBy>
+	<prov:informed prov:ref="ext_gr1_ioinit"/>
+	<prov:informant prov:ref="setup_timekeeping"/>
+</prov:wasInformedBy>
+<prov:wasInformedBy>
+	<prov:informed prov:ref="ext_gr1_ioinit"/>
+	<prov:informant prov:ref="setup_timekeeping"/>
+</prov:wasInformedBy>
+<prov:wasInformedBy>
+	<prov:informed prov:ref="ext_gr1_ioinit"/>
+	<prov:informant prov:ref="setup_timekeeping"/>
+</prov:wasInformedBy>
+<prov:activity prov:id="med_initialdata_input"/>
+<prov:activity prov:id="open_r_dataset"/>
+<prov:wasInformedBy>
+	<prov:informed prov:ref="med_initialdata_input"/>
+	<prov:informant prov:ref="open_r_dataset"/>
+</prov:wasInformedBy>
+<prov:activity prov:id="input_input"/>
+<prov:wasInformedBy>
+	<prov:informed prov:ref="med_initialdata_input"/>
+	<prov:informant prov:ref="input_input"/>
+</prov:wasInformedBy>
+<prov:wasInformedBy>
+	<prov:informed prov:ref="med_initialdata_input"/>
+	<prov:informant prov:ref="input_input"/>
+</prov:wasInformedBy>
+<prov:activity prov:id="start_domain_em"/>
+<prov:activity prov:id="phy_init"/>
+<prov:wasInformedBy>
+	<prov:informed prov:ref="start_domain_em"/>
+	<prov:informant prov:ref="phy_init"/>
+</prov:wasInformedBy>
+<prov:wasInformedBy>
+	<prov:informed prov:ref="start_domain_em"/>
+	<prov:informant prov:ref="phy_init"/>
+</prov:wasInformedBy>
+<prov:wasInformedBy>
+	<prov:informed prov:ref="start_domain_em"/>
+	<prov:informant prov:ref="phy_init"/>
+</prov:wasInformedBy>
+<prov:activity prov:id="nl_get_mminlu_loc"/>
+<prov:wasInformedBy>
+	<prov:informed prov:ref="phy_init"/>
+	<prov:informant prov:ref="nl_get_mminlu_loc"/>
+</prov:wasInformedBy>
+<prov:wasInformedBy>
+	<prov:informed prov:ref="phy_init"/>
+	<prov:informant prov:ref="nl_get_mminlu_loc"/>
+</prov:wasInformedBy>
+<prov:activity prov:id="landuse_init"/>
+<prov:wasInformedBy>
+	<prov:informed prov:ref="phy_init"/>
+	<prov:informant prov:ref="landuse_init"/>
+</prov:wasInformedBy>
+<prov:wasInformedBy>
+	<prov:informed prov:ref="phy_init"/>
+	<prov:informant prov:ref="landuse_init"/>
+</prov:wasInformedBy>
+<prov:entity prov:id="qr_acr_qg.dat"/>
+<prov:activity prov:id="phy_init"/>
+<prov:used>
+	<prov:activity prov:ref="phy_init"/>
+	<prov:entity prov:ref="qr_acr_qg.dat"/>
+</prov:used>
+<prov:entity prov:id="qr_acr_qs.dat"/>
+<prov:activity prov:id="phy_init"/>
+<prov:used>
+	<prov:activity prov:ref="phy_init"/>
+	<prov:entity prov:ref="qr_acr_qs.dat"/>
+</prov:used>
+<prov:entity prov:id="freezeH2O.dat"/>
+<prov:activity prov:id="phy_init"/>
+<prov:used>
+	<prov:activity prov:ref="phy_init"/>
+	<prov:entity prov:ref="freezeH2O.dat"/>
+</prov:used>
+<prov:wasInformedBy>
+	<prov:informed prov:ref="start_domain_em"/>
+	<prov:informant prov:ref="phy_init"/>
+</prov:wasInformedBy>
+<prov:activity prov:id="lightning_init"/>
+<prov:wasInformedBy>
+	<prov:informed prov:ref="start_domain_em"/>
+	<prov:informant prov:ref="lightning_init"/>
+</prov:wasInformedBy>
+<prov:wasInformedBy>
+	<prov:informed prov:ref="start_domain_em"/>
+	<prov:informant prov:ref="lightning_init"/>
+</prov:wasInformedBy>
+<prov:wasInformedBy>
+	<prov:informed prov:ref="med_initialdata_input"/>
+	<prov:informant prov:ref="start_domain_em"/>
+</prov:wasInformedBy>
+<prov:activity prov:id="integrate"/>
+<prov:wasInformedBy>
+	<prov:informed prov:ref="wrf"/>
+	<prov:informant prov:ref="integrate"/>
+</prov:wasInformedBy>
+<prov:entity prov:id="wrfout_d01_2018-04-05_000000"/>
+<prov:activity prov:id="med_hist_out"/>
+<prov:used>
+	<prov:activity prov:ref="med_hist_out"/>
+	<prov:entity prov:ref="wrfout_d01_2018-04-05_000000"/>
+</prov:used>
+<prov:activity prov:id="wrf_open_for_write_begin"/>
+<prov:activity prov:id="open_w_dataset"/>
+<prov:wasInformedBy>
+	<prov:informed prov:ref="wrf_open_for_write_begin"/>
+	<prov:informant prov:ref="open_w_dataset"/>
+</prov:wasInformedBy>
+<prov:activity prov:id="med_hist_out"/>
+<prov:used>
+	<prov:activity prov:ref="med_hist_out"/>
+	<prov:entity prov:ref="wrfout_d01_2018-04-05_000000"/>
+</prov:used>
+<prov:activity prov:id="outsub"/>
+<prov:wasInformedBy>
+	<prov:informed prov:ref="outsub"/>
+	<prov:informant prov:ref="open_w_dataset"/>
+</prov:wasInformedBy>
+<prov:wasInformedBy>
+	<prov:informed prov:ref="outsub"/>
+	<prov:informant prov:ref="open_w_dataset"/>
+</prov:wasInformedBy>
+<prov:activity prov:id="wrf_open_for_write_commit"/>
+<prov:wasInformedBy>
+	<prov:informed prov:ref="wrf_open_for_write_commit"/>
+	<prov:informant prov:ref="open_w_dataset"/>
+</prov:wasInformedBy>
+<prov:activity prov:id="med_hist_out"/>
+<prov:used>
+	<prov:activity prov:ref="med_hist_out"/>
+	<prov:entity prov:ref="wrfout_d01_2018-04-05_000000"/>
+</prov:used>
+<prov:wasInformedBy>
+	<prov:informed prov:ref="wrf_open_for_write_commit"/>
+	<prov:informant prov:ref="open_w_dataset"/>
+</prov:wasInformedBy>
+<prov:activity prov:id="med_hist_out"/>
+<prov:used>
+	<prov:activity prov:ref="med_hist_out"/>
+	<prov:entity prov:ref="wrfout_d01_2018-04-05_000000"/>
+</prov:used>
+<prov:activity prov:id="med_hist_out"/>
+<prov:used>
+	<prov:activity prov:ref="med_hist_out"/>
+	<prov:entity prov:ref="wrfout_d01_2018-04-05_000000"/>
+</prov:used>
+<prov:activity prov:id="med_latbound_in"/>
+<prov:wasInformedBy>
+	<prov:informed prov:ref="integrate"/>
+	<prov:informant prov:ref="med_latbound_in"/>
+</prov:wasInformedBy>
+<prov:entity prov:id="wrfbdy_d01"/>
+<prov:activity prov:id="med_latbound_in"/>
+<prov:used>
+	<prov:activity prov:ref="med_latbound_in"/>
+	<prov:entity prov:ref="wrfbdy_d01"/>
+</prov:used>
+<prov:activity prov:id="input_boundary"/>
+<prov:wasInformedBy>
+	<prov:informed prov:ref="med_latbound_in"/>
+	<prov:informant prov:ref="input_boundary"/>
+</prov:wasInformedBy>
+<prov:wasInformedBy>
+	<prov:informed prov:ref="integrate"/>
+	<prov:informant prov:ref="med_hist_out"/>
+</prov:wasInformedBy>
+<prov:wasInformedBy>
+	<prov:informed prov:ref="integrate"/>
+	<prov:informant prov:ref="med_hist_out"/>
+</prov:wasInformedBy>
+<prov:wasInformedBy>
+	<prov:informed prov:ref="integrate"/>
+	<prov:informant prov:ref="med_latbound_in"/>
+</prov:wasInformedBy>
+<prov:activity prov:id="med_latbound_in"/>
+<prov:used>
+	<prov:activity prov:ref="med_latbound_in"/>
+	<prov:entity prov:ref="wrfbdy_d01"/>
+</prov:used>
+<prov:wasInformedBy>
+	<prov:informed prov:ref="med_latbound_in"/>
+	<prov:informant prov:ref="input_boundary"/>
+</prov:wasInformedBy>
+<prov:wasInformedBy>
+	<prov:informed prov:ref="integrate"/>
+	<prov:informant prov:ref="med_hist_out"/>
+</prov:wasInformedBy>
+<prov:wasInformedBy>
+	<prov:informed prov:ref="integrate"/>
+	<prov:informant prov:ref="med_hist_out"/>
+</prov:wasInformedBy>
+<prov:wasInformedBy>
+	<prov:informed prov:ref="wrf"/>
+	<prov:informant prov:ref="integrate"/>
+</prov:wasInformedBy>
+<prov:activity prov:id="med_shutdown_io"/>
+<prov:activity prov:id="ext_gr1_ioexit"/>
+<prov:wasInformedBy>
+	<prov:informed prov:ref="med_shutdown_io"/>
+	<prov:informant prov:ref="ext_gr1_ioexit"/>
+</prov:wasInformedBy>
+<prov:wasInformedBy>
+	<prov:informed prov:ref="wrf"/>
+	<prov:informant prov:ref="med_shutdown_io"/>
+</prov:wasInformedBy>
+</prov:document>

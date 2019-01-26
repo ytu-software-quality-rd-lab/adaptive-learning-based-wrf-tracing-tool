@@ -1,4 +1,4 @@
-package main.java.AdaptiveWRFTracingTool.bean;
+package main.java.bean;
 
 public class Keyword {
 

@@ -2,6 +2,7 @@ package main.java.algorithm;
 
 import main.java.base.SparkBase;
 import main.java.controller.MainController;
+import main.java.util.FileUtil;
 import org.apache.spark.SparkConf;
 import org.apache.spark.ml.classification.NaiveBayes;
 import org.apache.spark.ml.classification.NaiveBayesModel;
@@ -10,53 +11,79 @@ import org.apache.spark.ml.evaluation.MulticlassClassificationEvaluator;
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
 
-public class NaiveBayesAlgorithm {
+import java.util.ArrayList;
+
+public class NaiveBayesAlgorithm extends BaseAlgorithm {
 
     public SparkBase sparkBase;
+    public FileUtil fileUtil;
 
     public NaiveBayesAlgorithm(SparkBase sparkBase){
         this.sparkBase = sparkBase;
+        this.fileUtil  = new FileUtil();
     }
 
-    public void applyNaiveBayes(String svFilePath, MainController mainController){
-        Double accuracySum = new Double(0);
-        Double precisionSum = new Double(0);
-        Double recallSum = new Double(0);
+    public void applyNaiveBayes(String svFilePath, MainController mainController, String fileName, Integer numOfFeatures){
+        ArrayList<Double> accuracyList  = new ArrayList<>();
+        ArrayList<Double> precisionList = new ArrayList<>();
+        ArrayList<Double> recallList    = new ArrayList<>();
 
-        Dataset<Row> dataFrame =
-                sparkBase.getSpark().read().format("libsvm").load(svFilePath);
+        Dataset<Row> trainingData = null;
+        Dataset<Row> testData     = null;
+        ArrayList<ArrayList<Dataset<Row>>> datasets = new ArrayList<>();
 
+        int counter;
         for(int i=0; i< mainController.getIterationCountValue(); i++){
-            Dataset<Row>[] splits = dataFrame.randomSplit(new double[]
-                    {mainController.getTrainingDataRate(), mainController.getTestDataRate()});
-            Dataset<Row> train = splits[0];
-            Dataset<Row> test = splits[1];
+            Double accuracySumKFold  = new Double(0);
+            Double precisionSumKFold = new Double(0);
+            Double recallSumKFold    = new Double(0);
 
-            NaiveBayes nb = new NaiveBayes();
-            NaiveBayesModel model = nb.fit(train);
+            if(mainController.getTenFold().isSelected()){
+                counter = 10;
+                datasets = splitAccordingTo10FoldCrossValidation(svFilePath, i, fileName, sparkBase, numOfFeatures);
+            }else {
+                counter = 1;
+                Dataset<Row>[] splits = fileUtil.getDataSet(sparkBase, svFilePath).randomSplit(new double[]{mainController.getTrainingDataRate(), mainController.getTestDataRate()});
+                trainingData = splits[0];
+                testData = splits[1];
+            }
 
-            Dataset<Row> predictions = model.transform(test);
+            for (int k=0; k<counter; k++){
+                if(mainController.getTenFold().isSelected()){
+                    testData = datasets.get(k).get(0);
+                    trainingData = datasets.get(k).get(1);
+                }
 
-            MulticlassClassificationEvaluator evaluator = new MulticlassClassificationEvaluator()
-                    .setLabelCol("label")
-                    .setPredictionCol("prediction")
-                    .setMetricName("weightedPrecision");
+                NaiveBayes nb = new NaiveBayes();
+                NaiveBayesModel model = nb.fit(trainingData);
 
-            precisionSum += (evaluator.evaluate(predictions));
+                Dataset<Row> predictions = model.transform(testData);
 
-            evaluator.setMetricName("weightedRecall");
-            recallSum += (evaluator.evaluate(predictions));
+                MulticlassClassificationEvaluator evaluator = new MulticlassClassificationEvaluator()
+                        .setLabelCol("label")
+                        .setPredictionCol("prediction")
+                        .setMetricName("weightedPrecision");
 
-            evaluator.setMetricName("accuracy");
-            accuracySum += (evaluator.evaluate(predictions));
+                precisionSumKFold += (evaluator.evaluate(predictions));
 
+                evaluator.setMetricName("weightedRecall");
+                recallSumKFold += (evaluator.evaluate(predictions));
+
+                evaluator.setMetricName("accuracy");
+                accuracySumKFold += (evaluator.evaluate(predictions));
+            }
+
+            accuracySumKFold  /= counter;
+            precisionSumKFold /= counter;
+            recallSumKFold    /= counter;
+
+            accuracyList.add(accuracySumKFold);
+            precisionList.add(precisionSumKFold);
+            recallList.add(recallSumKFold);
             System.out.println("Iteration count: " + (i+1));
         }
 
-        System.out.println("Done!\n");
-        mainController.setAccuracy(accuracySum / mainController.getIterationCountValue());
-        mainController.setPrecision(precisionSum / mainController.getIterationCountValue());
-        mainController.setRecall(recallSum / mainController.getIterationCountValue());
+        setResults(mainController, accuracyList, precisionList, recallList);
     }
 
 
